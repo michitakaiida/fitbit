@@ -6,6 +6,7 @@
 	- ![image](./認証.png)
 - If you have successfully authenticated, then it is displayed as follows:
 	- ![image](./認証後.png)
+	
 #preparation
 - it is necessary to set the **Browser**　type your fitbit API setting (Application Type)  
 
