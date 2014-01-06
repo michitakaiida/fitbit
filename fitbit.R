@@ -43,3 +43,38 @@ for(i in i:length(parseData$`activities-steps`)){
 }
 #ggplotで描画
 qplot(date, step, geom="bar", stat="identity", fill = factor(date))
+
+
+##睡眠時間を取得###########
+
+today <- Sys.Date()
+dayList <- seq(as.Date("2013-12-18"), as.Date(today), by="days")
+baseURL <-"http://api.fitbit.com/1/user/-/sleep/date/"
+URL <-paste(baseURL,dayList,".json",sep = "")
+totalTimeInBed <- c()
+totalMinutesAsleep <- c()
+
+
+i <- 1
+for(i in i:length(URL)){
+  sleep<- GET(URL[i],sig) 
+  rawData <- sleep[[6]]
+  charData <- rawToChar(rawData, multiple = FALSE)
+  parseData <- fromJSON(charData, method = 'C')
+  totalTimeInBed <- c(totalTimeInBed ,parseData$summary$totalTimeInBed)
+  totalMinutesAsleep <- c(totalMinutesAsleep,parseData$summary$totalMinutesAsleep)
+}
+wakeTime <- totalTimeInBed - totalMinutesAsleep
+sleepData <- cbind(dayList,totalTimeInBed,totalMinutesAsleep,wakeTime)
+sleepData <- melt(sleepData,id="dayList",measure=c("totalTimeInBed","totalMinutesAsleep","wakeTime"))
+sleepData <- subset(sleepData,value !=0)
+sleepData <- subset(sleepData,X2 !="dayList")
+ggplot(sleepData,aes(x=X1,y=value,group=X2,colour=X2 )) + geom_line()
+
+sleepData <- subset(sleepData,X2 !="totalTimeInBed")
+ggplot(data=sleepData, aes(x=X1, y=value, fill=X2))+geom_bar(stat="identity")
+
+sleepRate <- totalMinutesAsleep /totalTimeInBed
+plot(sleepRate[!is.na(sleepRate)],type="l")
+max(sleepRate[!is.na(sleepRate)])
+
